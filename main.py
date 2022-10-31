@@ -1,4 +1,3 @@
-from tkinter import E
 from elasticsearch import Elasticsearch
 from elasticsearch import helpers
 from elasticsearch_dsl import connections
