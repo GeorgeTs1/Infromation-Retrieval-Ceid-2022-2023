@@ -1,0 +1,4 @@
+elasticsearch
+requests
+pandas
+elasticsearch_dsl
