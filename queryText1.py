@@ -39,11 +39,11 @@ def tenPercentMostRelevantBooks(es, cMetric):
         ) 
 
     finalMetricDf.sort_values(by=['customMetric'], inplace=True, ascending=False)
-
-    numBooksToShow = len(finalMetricDf.index) // 10
     #drop all rows with zero custom metric
     finalMetricDf = finalMetricDf[finalMetricDf['customMetric'] > 0]
     
+    numBooksToShow = len(finalMetricDf.index) // 10
+
     #drop all rows except 10% with highest final score 
     finalMetricDf = finalMetricDf.head(numBooksToShow)
 
