@@ -1,7 +1,6 @@
 *.csv
 *.docx
 env/
-test.py
 *.md
 env
 *.txt
