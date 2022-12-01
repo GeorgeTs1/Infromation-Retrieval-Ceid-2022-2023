@@ -1,6 +1,5 @@
 from elasticsearch import Elasticsearch, helpers
 import re
-from sklearn.feature_extraction.text import TfidfVectorizer
 import pandas as pd
 import nltk
 from nltk.stem import WordNetLemmatizer
@@ -15,7 +14,7 @@ def getAllBooks(resp):
 
 def similarities_to_elastic(chunkList):
     for i in range(len(chunkList)):
-        print(f'Uploadinfg chunk no. {i+1} ')
+        print(f'Uploading chunk no. {i+1} ')
         for index, document in chunkList[i].iterrows():
             index.todict()
             yield{
@@ -23,7 +22,7 @@ def similarities_to_elastic(chunkList):
                 "_source": document
             }
 
-es = Elasticsearch(host='localhost', port='9200',http_auth=("marios","11111111"), http_compress=True)
+es = Elasticsearch(host='localhost', port='9200',http_auth=("elastic","Altair1453"))
 y = 0
 books = []
 

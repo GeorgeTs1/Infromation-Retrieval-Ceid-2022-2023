@@ -2,3 +2,6 @@ elasticsearch
 requests
 pandas
 elasticsearch_dsl
+nltk
+scikit-learn
+matplotlib

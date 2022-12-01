@@ -16,6 +16,8 @@ books_df = pd.read_csv("BX-Books.csv") #reading data from csv file
 books_ratings_df = pd.read_csv("BX-Book-Ratings.csv")
 books_users_df = pd.read_csv("BX-Users.csv")
 
+
+
 es = Elasticsearch(host='localhost', port='9200',http_auth=("elastic","Altair1453"))
 
 
@@ -28,7 +30,7 @@ def books_csv_to_elastic(df):
                 "isbn" : str(row["isbn"]),
                 'book_title' : str(row['book_title']),
                 'book_author' : str(row['book_author']),
-                'year_of_publication' : str(row['year_of_publication']),
+                'year_of_publication' : int(row['year_of_publication']),
                 'publisher' : str(row['publisher']),
                 'summary' : str(row['summary']),
                 'category' : str(row['category'])
@@ -43,9 +45,9 @@ def books_ratings_csv_to_elastic(df):
         yield{ 
              "_index" : "ratings",
              "_source" : {
-                "uid" : str(row["uid"]),
+                "uid" : int(row["uid"]),
                 "isbn" : str(row["isbn"]),
-                "rating" : str(row["rating"])
+                "rating" : float(row["rating"])
                 }
 
             }
@@ -58,7 +60,7 @@ def books_users_csv_to_elastic(df):
         yield{ 
              "_index" : "users",
              "_source" : {
-                "uid" : str(row["uid"]),
+                "uid" : int(row["uid"]),
                 "location" : str(row["location"]),
                 "age" : str(row["age"])
                 }

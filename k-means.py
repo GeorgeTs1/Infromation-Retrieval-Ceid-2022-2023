@@ -2,7 +2,7 @@ from elasticsearch import Elasticsearch, helpers
 import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.cluster import KMeans
-
+import numpy as np
 
 def getAllUsers(es):
     resp = helpers.scan(es, index = 'users', scroll = '3m', size = 100)
@@ -19,8 +19,8 @@ def userClustersToElastic(df):
         yield{ 
             "_index" : "user_clusters",
             "_source" : {
-                "uid" : str(row["uid"]),
-                "cluster" : str(row["Cluster"])
+                "uid" : int(row["uid"]),
+                "cluster" : int(row["Cluster"])
                 }
             }
 
@@ -36,13 +36,15 @@ def makeUserInfoDf(es):
 def classifyUsers(entrydf):
     df = entrydf.copy()  
     df['Country'] = abs(df['Country'].apply(hash)) % (10 ** 3)
-    df = df.dropna()
+    #df = df.dropna()
     #To give random ages to users with age == NaN delete line above and uncomment line below:
-    #df.loc[df['Age'].isnull(),'Age'] = 18 + (np.trunc(abs(np.random.normal(0,50, len(df.loc[df['Age'].isnull()]))))) % 100    
+    df.loc[df['Age'].isnull(),'Age'] = 18 + (np.trunc(abs(np.random.normal(0,50, len(df.loc[df['Age'].isnull()]))))) % 100    
     return df
 
+
+
 if __name__ == "__main__":
-    es = Elasticsearch(host='localhost', port='9200', http_auth=("marios","11111111"), http_compress=True)
+    es = Elasticsearch(host='localhost', port='9200', http_auth=("elastic","Altair1453"),http_compress=True)
     usersDf = makeUserInfoDf(es)
     classifiedUsersDf = classifyUsers(usersDf)
     print(usersDf) 

@@ -4,3 +4,5 @@ env/
 test.py
 *.md
 env
+*.txt
+*.bak
