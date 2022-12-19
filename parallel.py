@@ -8,6 +8,8 @@ from elasticsearch.helpers import bulk
 import sys
 import fileinput
 import numpy as np
+import multiprocessing
+from multiprocessing import Pool,Process
  
 es = Elasticsearch(host='localhost', port='9200',http_auth=("elastic","Altair1453"), http_compress=True)
 
@@ -102,40 +104,40 @@ def get_avg4books(isbn,uid):
     
 
    
-      
-         
-   
-           
 
-
-
-def get_users_ratings_books():
+def get_users_ratings_books(uid):
   users = helpers.scan(es, index = 'users', scroll = '3m', size = 100)
   books = helpers.scan(es, index = 'books', scroll = '3m', size = 100)
   ratings = helpers.scan(es, index = 'ratings', scroll = '3m', size = 100)
   numUsersInEs = es.count(index='users', body={'query': {'match_all': {}}})["count"] # getting the number of users from elastic
   books_not_rated_df = pd.DataFrame() 
+
+
+  books_rated = []
+  books_unrated = []
+  print(uid)
   
+  books_rated += isbn_rated(uid)
+  books_unrated += isbn_unrated(books_rated)
 
-  for i in users:
-    books_rated = []
-    books_unrated = []
-    print(i['_source']['uid'])
-    
-    books_rated += isbn_rated(i['_source']['uid'])
-    books_unrated += isbn_unrated(books_rated)
-
-    books_not_rated_df['uid'] = i['_source']['uid']
-    books_not_rated_df['rating'] = get_avg4books(books_unrated,i['_source']['uid'])
-
-  print(books_not_rated_df)
+  books_not_rated_df['uid'] = uid
   
+  books_not_rated_df['rating'] = get_avg4books(books_unrated,uid)
 
 
-  
+  return books_not_rated_df
 
-#get_users_ratings_books()        
+numUsersInEs = es.count(index='users', body={'query': {'match_all': {}}})["count"] # getting the number of users from elastic
+       
+users = helpers.scan(es, index = 'users', scroll = '3m', size = 100)
 
+
+
+if __name__ == '__main__':
+    with Pool(processes = 4) as p:
+       results = p.map(get_users_ratings_books,[i['_source']['uid'] for i in users])
+       print(results)       
+   
 
 
 """ rated = []
