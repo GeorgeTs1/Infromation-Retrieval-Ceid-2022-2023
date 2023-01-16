@@ -27,7 +27,7 @@ def uploadAvgsOfClusters(allAvgs):
             "_index" : f"ratings_of_cluster",
             "_source" : {
                 "isbn" : str(row["isbn"]),
-                "rating" : float(row["rating"])
+                "av_rating" : float(row["av_rating"])
             }
         }
 
@@ -67,7 +67,7 @@ if __name__ == '__main__':
 
     input('Press any button to start uploading cluster averages...')
     es.indices.delete(index = 'ratings_of_cluster', ignore = [400, 404])
-    helpers.bulk(uploadAvgsOfClusters(es, allAvgs))
+    helpers.bulk(es, uploadAvgsOfClusters(allAvgs))
     print('Cluster averages uploaded')
 
     st = time.time()
@@ -91,7 +91,7 @@ if __name__ == '__main__':
         #finalDf: uid | isbn | rating | av_rating
         finalDf.rating.fillna(finalDf.av_rating, inplace=True)
         del finalDf['av_rating']    #finalDf: uid | isbn | rating 
-        finalDf = finalDf.groupby(['isbn', 'rating'])['uid'].apply(', '.join).reset_index()
+        finalDf = finalDf.groupby(['isbn', 'rating'])['uid'].apply(' _'.join).reset_index()
         finalDf['cluster'] = i
         helpers.bulk(es, uploadAllRatings(finalDf))
         print(i)
