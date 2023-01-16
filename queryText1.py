@@ -8,7 +8,11 @@ def tenPercentMostRelevantBooks(es, cMetric):
     word = str(input('Now insert a string to query: '))
 
     #to avoid warnings search queries in es 7.15.0 and higher should be written as follows:
-    respUid = es.search(query = {"match":{"uid" : f"{uid}"}}, index = "ratings", size = 10000)
+    x = int(input("Do you want to search given ratings, or all ratings? (1 = given, 2 = all):"))
+    if x == 1:
+        respUid = es.search(query = {"match":{"uid" : f"{uid}"}}, index = "ratings", size = 10000)
+    elif x == 2:
+        respUid = es.search(query = {"query_string": {'query': f"*_{uid}.0*", 'default_field': "uid"}}, index = "ratings_of_all_users", size = 10000)
     respBooks = es.search(query = {"match":{"book_title": f"{word}"}}, index = 'books', size = 10000)
 
     #create dataframes to use
