@@ -1,15 +1,10 @@
-from collections import deque
 import numpy as np 
 import pandas as pd
-import re
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
-import spacy
-from nltk.corpus import stopwords
-from wordcloud import WordCloud,STOPWORDS
-from keras.utils import to_categorical
-import matplotlib.pyplot as plt
-import string
+#import spacy
+#from nltk.corpus import stopwords
+#from wordcloud import WordCloud,STOPWORDS
 from elasticsearch import Elasticsearch
 from elasticsearch import helpers
 from keras.preprocessing.text import Tokenizer
@@ -18,134 +13,12 @@ from keras.models import Sequential
 from keras.layers import LSTM,Dense,Dropout
 from keras.layers import Bidirectional,Embedding,Flatten
 from keras.callbacks import EarlyStopping,ModelCheckpoint
-from sklearn.preprocessing import OneHotEncoder
-from keras.optimizers import Adam,SGD,Adagrad
+from keras.optimizers import Adam
 import warnings
 import timeit
 
 warnings.filterwarnings("ignore")
 
-
-apposV2 = {
-"are not" : "are not",
-"ca" : "can",
-"could n't" : "could not",
-"did n't" : "did not",
-"does n't" : "does not",
-"do n't" : "do not",
-"had n't" : "had not",
-"has n't" : "has not",
-"have n't" : "have not",
-"he'd" : "he would",
-"he'll" : "he will",
-"he's" : "he is",
-"i'd" : "I would",
-"i'd" : "I had",
-"i'll" : "I will",
-"i'm" : "I am",
-"is n't" : "is not",
-"it's" : "it is",
-"it'll":"it will",
-"i've" : "I have",
-"let's" : "let us",
-"might n't" : "might not",
-"must n't" : "must not",
-"sha" : "shall",
-"she'd" : "she would",
-"she'll" : "she will",
-"she's" : "she is",
-"should n't" : "should not",
-"that's" : "that is",
-"there's" : "there is",
-"they'd" : "they would",
-"they'll" : "they will",
-"they're" : "they are",
-"they've" : "they have",
-"we'd" : "we would",
-"we're" : "we are",
-"were n't" : "were not",
-"we've" : "we have",
-"what'll" : "what will",
-"what're" : "what are",
-"what's" : "what is",
-"what've" : "what have",
-"where's" : "where is",
-"who'd" : "who would",
-"who'll" : "who will",
-"who're" : "who are",
-"who's" : "who is",
-"who've" : "who have",
-"wo" : "will",
-"would n't" : "would not",
-"you'd" : "you would",
-"you'll" : "you will",
-"you're" : "you are",
-"you've" : "you have",
-"'re": " are",
-"was n't": "was not",
-"we'll":"we will",
-"did n't": "did not"
-}
-appos = {
-"aren't" : "are not",
-"can't" : "cannot",
-"couldn't" : "could not",
-"didn't" : "did not",
-"doesn't" : "does not",
-"don't" : "do not",
-"hadn't" : "had not",
-"hasn't" : "has not",
-"haven't" : "have not",
-"he'd" : "he would",
-"he'll" : "he will",
-"he's" : "he is",
-"i'd" : "I would",
-"i'd" : "I had",
-"i'll" : "I will",
-"i'm" : "I am",
-"isn't" : "is not",
-"it's" : "it is",
-"it'll":"it will",
-"i've" : "I have",
-"let's" : "let us",
-"mightn't" : "might not",
-"mustn't" : "must not",
-"shan't" : "shall not",
-"she'd" : "she would",
-"she'll" : "she will",
-"she's" : "she is",
-"shouldn't" : "should not",
-"that's" : "that is",
-"there's" : "there is",
-"they'd" : "they would",
-"they'll" : "they will",
-"they're" : "they are",
-"they've" : "they have",
-"we'd" : "we would",
-"we're" : "we are",
-"weren't" : "were not",
-"we've" : "we have",
-"what'll" : "what will",
-"what're" : "what are",
-"what's" : "what is",
-"what've" : "what have",
-"where's" : "where is",
-"who'd" : "who would",
-"who'll" : "who will",
-"who're" : "who are",
-"who's" : "who is",
-"who've" : "who have",
-"won't" : "will not",
-"wouldn't" : "would not",
-"you'd" : "you would",
-"you'll" : "you will",
-"you're" : "you are",
-"you've" : "you have",
-"'re": " are",
-"wasn't": "was not",
-"we'll":" will",
-"didn't": "did not"
-}
 
 def uploadAllRatings(df):
     for row in df.itertuples():
@@ -158,25 +31,6 @@ def uploadAllRatings(df):
                 "cluster": str(row.cluster)
             }
         }
-
-def get_users_same_cluster(cluster):
-  
-  users_same_cluster = helpers.scan(es,index="user_clusters",query={"query":{
-    
-      "bool" : {
-      
-      "must" : {
-        "match" : { "cluster" : cluster }
-      }
-      }}})
-
-  users_list = []
-
-  for j in users_same_cluster:
-     users_list.append(j['_source']['uid'])
-
-  return users_list 
-
 
 
 def get_all_ratings(cluster):
@@ -268,27 +122,6 @@ def get_all_ratings(cluster):
 
     return ratings_summaries , not_rated_summaries
 
-def cleanData(summaries):
-    all_=[]
-    for summary in summaries:
-        lower_case = summary.lower() #lower case the text
-        lower_case = lower_case.replace(" n't"," not") #correct n't as not
-        lower_case = lower_case.replace("."," . ")
-        lower_case = ' '.join(word.strip(string.punctuation) for word in lower_case.split()) #remove punctuation
-        words = lower_case.split() #split into words
-        words = [word for word in words if word.isalpha()] #remove numbers
-        split = [apposV2[word] if word in apposV2 else word for word in words] #correct using apposV2 as mentioned above
-        split = [appos[word] if word in appos else word for word in split] #correct using appos as mentioned above
-        split = [word for word in split if word not in stop] #remove stop words
-        reformed = " ".join(split) #join words back to the text
-        doc = nlp(reformed)
-        reformed = " ".join([token.lemma_ for token in doc]) #lemmatiztion
-        all_.append(reformed)
-    df_cleaned = pd.DataFrame()
-    df_cleaned['clean_summary'] = all_
-    return df_cleaned['clean_summary']
-
-
 
 def tokenizer_X(X):
   tokenizer = Tokenizer()
@@ -337,16 +170,15 @@ def nn(vocab,emb_vector,X):
 
 
 if __name__ == '__main__':
-  es = Elasticsearch(host='localhost', port='9200',http_auth=("elastic","Altair1453"), http_compress=True,timeout=3600)
-  nlp = spacy.load('en_core_web_sm',disable=['parser','ner'])
-  stop = stopwords.words('english')
+  es = Elasticsearch(host='localhost', port='9200',http_auth=("marios","11111111"))
   embedding_vector_length=32
   tokenizer = Tokenizer()
   scaler = MinMaxScaler(feature_range=(0,1))
 
   print("creating index neural net...")
 
-  es.indices.create(index='neural_net')
+  if not es.indices.exists(index = 'neural_net'):
+    es.indices.create(index='neural_net')
 
   es.indices.put_settings(index='neural_net',body={
     "refresh_interval" : "-1" 
@@ -363,8 +195,7 @@ if __name__ == '__main__':
   for i in range(64):
     data = pd.DataFrame(columns=['isbn','summary','rating'])
     not_rated = pd.DataFrame(columns=['isbn','summary'])
-    final_data = pd.DataFrame(columns=['cluster','uid','isbn','rating'])
-    users_same_cluster = get_users_same_cluster(i)
+    final_data = pd.DataFrame(columns=['cluster','isbn','rating'])
 
     data,not_rated = get_all_ratings(i)
     X = data['summary'].copy()
@@ -397,17 +228,13 @@ if __name__ == '__main__':
     final_data['isbn'] = not_rated['isbn']
     final_data['rating'] = predicted_ratings
 
-    final_data['uid'] =  [users_same_cluster] * len(final_data.axes[0])
-    
     final_data['cluster'] = [i] * len(final_data.axes[0])
-
-    
-
+    print(final_data.head())
     print(f'Uploading cluster {i} to elasticsearch...')
 
-    for ok,response in helpers.streaming_bulk(es,uploadAllRatings(final_data),chunk_size=1000):
+    '''for ok,response in helpers.streaming_bulk(es,uploadAllRatings(final_data),chunk_size=10000):
       if not ok:
-       print(response)
+        print(response)'''
 
     
 

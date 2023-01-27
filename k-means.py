@@ -75,12 +75,12 @@ if __name__ == "__main__":
 
     inertias = []
 
-    for i in range(1, 11):
+    for i in range(1, 64):
         kmeans = KMeans(n_clusters=i)
         kmeans.fit(data)
         inertias.append(kmeans.inertia_)
 
-    axis[2].plot(range(1, 11), inertias, marker='o')
+    axis[2].plot(range(1, 64), inertias, marker='o')
     axis[2].set_title('Elbow method')
     axis[2].set_xlabel('Number of clusters')
     axis[2].set_label('Inertia')
