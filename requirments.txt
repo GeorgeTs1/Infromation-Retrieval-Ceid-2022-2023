@@ -2,3 +2,9 @@ elasticsearch
 requests
 pandas
 elasticsearch_dsl
+nltk
+scikit-learn
+matplotlib
+numpy
+tensorflow
+tensorflow-estimator

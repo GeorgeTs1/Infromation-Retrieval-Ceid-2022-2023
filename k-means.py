@@ -19,8 +19,8 @@ def userClustersToElastic(df):
         yield{ 
             "_index" : "user_clusters",
             "_source" : {
-                "uid" : str(row["uid"]),
-                "cluster" : str(row["Cluster"])
+                "uid" : int(row["uid"]),
+                "cluster" : int(row["Cluster"])
                 }
             }
 
@@ -41,8 +41,10 @@ def classifyUsers(entrydf):
     df.loc[df['Age'].isnull(),'Age'] = 18 + (np.trunc(abs(np.random.normal(0,50, len(df.loc[df['Age'].isnull()]))))) % 100    
     return df
 
+
+
 if __name__ == "__main__":
-    es = Elasticsearch(host='localhost', port='9200', http_auth=("marios","11111111"), http_compress=True)
+    es = Elasticsearch(host='localhost', port='9200', http_auth=("elastic","Altair1453"),http_compress=True)
     usersDf = makeUserInfoDf(es)
     classifiedUsersDf = classifyUsers(usersDf)
     print(usersDf) 
