@@ -2,7 +2,7 @@ from elasticsearch import Elasticsearch, helpers
 import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.cluster import KMeans
-
+import numpy as np
 
 def getAllUsers(es):
     resp = helpers.scan(es, index = 'users', scroll = '3m', size = 100)
@@ -36,9 +36,9 @@ def makeUserInfoDf(es):
 def classifyUsers(entrydf):
     df = entrydf.copy()  
     df['Country'] = abs(df['Country'].apply(hash)) % (10 ** 3)
-    df = df.dropna()
+    #df = df.dropna()
     #To give random ages to users with age == NaN delete line above and uncomment line below:
-    #df.loc[df['Age'].isnull(),'Age'] = 18 + (np.trunc(abs(np.random.normal(0,50, len(df.loc[df['Age'].isnull()]))))) % 100    
+    df.loc[df['Age'].isnull(),'Age'] = 18 + (np.trunc(abs(np.random.normal(0,50, len(df.loc[df['Age'].isnull()]))))) % 100    
     return df
 
 if __name__ == "__main__":
@@ -52,7 +52,7 @@ if __name__ == "__main__":
 
     data = list(zip(z, y))
 
-    kmeans = KMeans(n_clusters = 8)
+    kmeans = KMeans(n_clusters = 64)
     kmeans.fit(data)
 
     clusterByUser = kmeans.fit_predict(data, y=None, sample_weight=None)
@@ -73,12 +73,12 @@ if __name__ == "__main__":
 
     inertias = []
 
-    for i in range(1, 11):
+    for i in range(1, 64):
         kmeans = KMeans(n_clusters=i)
         kmeans.fit(data)
         inertias.append(kmeans.inertia_)
 
-    axis[2].plot(range(1, 11), inertias, marker='o')
+    axis[2].plot(range(1, 64), inertias, marker='o')
     axis[2].set_title('Elbow method')
     axis[2].set_xlabel('Number of clusters')
     axis[2].set_label('Inertia')

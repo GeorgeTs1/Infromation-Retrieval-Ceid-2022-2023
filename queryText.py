@@ -52,7 +52,7 @@ for j in range(iterations):
     if j == 0:
         x = 0
     for i in range(x, (j+1)*len(books)//iterations):
-        doc = re.sub('[^a-zA-Z]', ' ', books[i][2])
+        doc = re.sub('[^a-zA-Z]', ' ', books[i][1])
         doc = str(doc).lower()
         doc = doc.split()
         doc = [lemmatizer.lemmatize(word) for word in doc if not word in set(stopwords)]    
@@ -68,19 +68,26 @@ for j in range(iterations):
     tfidfs.append(tfidf_matrix.T)
     print(f"Chunk no. {j+1} ready!")
 
+j=0
+k=0
+bulk(es, tfidfs, index = 'similarities')
+
+'''jsons = []
+for i in tfidfs:  
+    jsons.append(i.to_json(orient = 'columns'))
+    print(f'Chunk {j} jsoned!')      
+    if j == 3:
+        helpers.bulk(es, jsons, index = f'similarities{k}')
+        print('Uploaded 4 chunks')
+        j=0
+        jsons = []
+        k+=1
+    j+=1
+    #for small jsons:
+    #es.index(index=f'similarities{j}', ignore=400, id=j, document=json.loads(i))'''
+
 print(f'All chunks ready. Uploading {iterations} chunks to elasticsearch: ')
 
-j = 1
-for i in tfidfs: 
-    print(type(i))
-'''    result = i.to_json(orient="split")
-    parsed = json.loads(result)
-    result = json.dumps(parsed, indent=4)  
-    docket_content = result.read()
-    es.index(index='similarities', ignore=400, doc_type='docket', 
-    id=j, body=json.loads(docket_content))
-    j = j + 1
-    print(f'Chunk {j} uploaded!')'''
 et = time.time()
 
 print('time: ',et-st)
