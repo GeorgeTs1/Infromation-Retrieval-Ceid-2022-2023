@@ -18,8 +18,9 @@ books_users_df = pd.read_csv("BX-Users.csv")
 
 
 
-es = Elasticsearch(host='localhost', port='9200',http_auth=("elastic","Altair1453"))
-
+es = Elasticsearch(
+    "http://localhost:9200",
+    http_auth=("elastic","Altair1453"))
 
 def books_csv_to_elastic(df):
     for index,row in df.iterrows():

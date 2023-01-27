@@ -54,7 +54,7 @@ if __name__ == "__main__":
 
     data = list(zip(z, y))
 
-    kmeans = KMeans(n_clusters = 8)
+    kmeans = KMeans(n_clusters = 64)
     kmeans.fit(data)
 
     clusterByUser = kmeans.fit_predict(data, y=None, sample_weight=None)
