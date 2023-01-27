@@ -349,7 +349,7 @@ if __name__ == '__main__':
   es.indices.create(index='neural_net')
 
   es.indices.put_settings(index='neural_net',body={
-    "refresh_interval" : "30s" 
+    "refresh_interval" : "-1" 
     })
 
   # es.indices.put_settings(index='neural_net',body={
@@ -405,7 +405,7 @@ if __name__ == '__main__':
 
     print(f'Uploading cluster {i} to elasticsearch...')
 
-    for ok,response in helpers.streaming_bulk(es,uploadAllRatings(final_data),chunk_size=10000):
+    for ok,response in helpers.streaming_bulk(es,uploadAllRatings(final_data),chunk_size=1000):
       if not ok:
        print(response)
 
