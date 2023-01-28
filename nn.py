@@ -192,12 +192,10 @@ if __name__ == '__main__':
     X = data['summary'].copy()
     y = data['rating'].copy()
 
-    print(y.describe())
-
     y = scaler.fit_transform(y.values.reshape(-1,1))
 
     
-    X_train, X_val, y_train, y_val = train_test_split(X, y,random_state=42,test_size=0.3)
+    X_train, X_val, y_train, y_val = train_test_split(X, y,random_state=42,test_size=0.25)
 
     X_train,vocab_size,max_length = tokenizer_X(X_train)
     X_val,vocab_validate,max_validate = tokenizer_X(X_val)
@@ -227,7 +225,6 @@ if __name__ == '__main__':
 
     final_data['cluster'] = [i] * len(final_data.axes[0])
 
-    print(final_data.head())
     print(f'Uploading cluster {i} to elasticsearch...')
 
     for ok,response in helpers.streaming_bulk(es,uploadAllRatings(final_data),chunk_size=10000):
