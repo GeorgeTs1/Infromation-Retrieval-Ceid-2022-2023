@@ -26,7 +26,6 @@ def uploadAllRatings(df):
             "_index" : "neural_net",
             "_source" : {
                 "isbn" : str(row.isbn),
-                "uid": str(row.uid),
                 "rating" : float(row.rating),
                 "cluster": str(row.cluster)
             }
@@ -232,12 +231,9 @@ if __name__ == '__main__':
     print(final_data.head())
     print(f'Uploading cluster {i} to elasticsearch...')
 
-    '''for ok,response in helpers.streaming_bulk(es,uploadAllRatings(final_data),chunk_size=10000):
+    for ok,response in helpers.streaming_bulk(es, uploadAllRatings(final_data), chunk_size=10000):
       if not ok:
-        print(response)'''
-
-    
-
+        print(response)
 
     print(f'cluster_ratings {i} is uploaded to elastic')
 
