@@ -69,7 +69,7 @@ def tenPercentMostRelevantBooks(es, cMetric):
 
 if __name__ == '__main__':
 
-    es = Elasticsearch(host='localhost', port='9200',http_auth=("elastic","Altair1453"), http_compress=True)
+    es = Elasticsearch(host='localhost', port='9200',http_auth=("elastic","putyourpasswordhere"), http_compress=True)
     customMetricFactor = 0.6
     metrics = tenPercentMostRelevantBooks(es, customMetricFactor)
     print(metrics.head(metrics.shape[0]))
