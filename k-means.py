@@ -44,7 +44,7 @@ def classifyUsers(entrydf):
 
 
 if __name__ == "__main__":
-    es = Elasticsearch(host='localhost', port='9200', http_auth=("elastic","Altair1453"),http_compress=True)
+    es = Elasticsearch(host='localhost', port='9200', http_auth=("elastic","putyourpasswordhere"),http_compress=True)
     usersDf = makeUserInfoDf(es)
     classifiedUsersDf = classifyUsers(usersDf)
     print(usersDf) 
