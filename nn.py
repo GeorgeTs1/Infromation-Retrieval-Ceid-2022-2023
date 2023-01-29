@@ -162,7 +162,7 @@ def nn(vocab,emb_vector,X):
 
 
 if __name__ == '__main__':
-  es = Elasticsearch(host='localhost', port='9200',http_auth=("marios","11111111"),timeout=3600)
+  es = Elasticsearch(host='localhost', port='9200',http_auth=("elastic","Altair1453"),timeout=3600)
   embedding_vector_length=32
   tokenizer = Tokenizer()
   scaler = MinMaxScaler(feature_range=(0,1))
