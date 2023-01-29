@@ -10,7 +10,6 @@ from keras.models import Sequential
 from keras.layers import LSTM,Dense,Dropout
 from keras.layers import Bidirectional,Embedding,Flatten
 from keras.callbacks import EarlyStopping,ModelCheckpoint
-from keras.optimizers import Adam
 from keras.backend import clear_session
 import warnings
 import timeit
