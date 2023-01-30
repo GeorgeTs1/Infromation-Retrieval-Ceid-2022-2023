@@ -11,6 +11,7 @@ from keras.layers import LSTM,Dense,Dropout
 from keras.layers import Bidirectional,Embedding,Flatten
 from keras.callbacks import EarlyStopping,ModelCheckpoint
 from keras.backend import clear_session
+from Add2Elastic import es
 import warnings
 import timeit
 
@@ -162,7 +163,6 @@ def nn(vocab,emb_vector,X):
 
 
 if __name__ == '__main__':
-  es = Elasticsearch(host='localhost', port='9200',http_auth=("elastic","putyourpasswordhere"),timeout=3600)
   embedding_vector_length=32
   tokenizer = Tokenizer()
   scaler = MinMaxScaler(feature_range=(0,1))
