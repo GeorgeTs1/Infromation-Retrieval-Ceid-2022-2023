@@ -3,6 +3,7 @@ import pandas as pd
 import time
 import numpy as np
 from datetime import timedelta
+from Add2Elastic import es
 
 pd.options.mode.chained_assignment = None #get rid of warning
 
@@ -45,7 +46,6 @@ def uploadAllRatings(df):
 
 
 if __name__ == '__main__':
-    es = Elasticsearch(host='localhost', port='9200', http_auth=("elastic","putyourpasswordhere"), http_compress=True,timeout=3600)
     #print(es.count(index='ratings_of_all_users', body={'query': {'match_all': {}}})["count"])
     numOfClusters = 64
 
