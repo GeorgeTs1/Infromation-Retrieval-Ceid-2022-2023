@@ -3,6 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.cluster import KMeans
 import numpy as np
+from Add2Elastic import es
 
 def getAllUsers(es):
     resp = helpers.scan(es, index = 'users', scroll = '3m', size = 100)
@@ -44,7 +45,6 @@ def classifyUsers(entrydf):
 
 
 if __name__ == "__main__":
-    es = Elasticsearch(host='localhost', port='9200', http_auth=("elastic","putyourpasswordhere"),http_compress=True)
     usersDf = makeUserInfoDf(es)
     classifiedUsersDf = classifyUsers(usersDf)
     print(usersDf) 
