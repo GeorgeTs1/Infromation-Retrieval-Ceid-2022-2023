@@ -1,9 +1,13 @@
-from elasticsearch import Elasticsearch, helpers
+from elasticsearch import helpers
+from elasticsearch import Elasticsearch
 import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.cluster import KMeans
 import numpy as np
-from Add2Elastic import es
+import warnings
+
+
+warnings.filterwarnings("ignore")
 
 def getAllUsers(es):
     resp = helpers.scan(es, index = 'users', scroll = '3m', size = 100)
@@ -15,13 +19,13 @@ def getAllUsers(es):
 
 def userClustersToElastic(df):
     print('Starting upload to index: user_clusters')
-    for index,row in df.iterrows():
-        print(f"Uplaoding {row['uid']} user's clustering data")
+    for row in df.itertuples():
+        print(f"Uplaoding {row.uid} user's clustering data")
         yield{ 
             "_index" : "user_clusters",
             "_source" : {
-                "uid" : int(row["uid"]),
-                "cluster" : int(row["Cluster"])
+                "uid" : int(row.uid),
+                "cluster" : int(row.Cluster)
                 }
             }
 
@@ -45,6 +49,9 @@ def classifyUsers(entrydf):
 
 
 if __name__ == "__main__":
+    es = Elasticsearch(
+    "http://localhost:9200",
+    http_auth=("elastic","Altair1453"),timeout=3600)
     usersDf = makeUserInfoDf(es)
     classifiedUsersDf = classifyUsers(usersDf)
     print(usersDf) 

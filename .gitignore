@@ -3,5 +3,4 @@
 env/
 *.md
 env
-*.txt
 *.bak

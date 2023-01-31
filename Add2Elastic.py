@@ -1,9 +1,5 @@
 from elasticsearch import Elasticsearch
-from elasticsearch import helpers
-from elasticsearch_dsl import connections
-import requests
 import pandas as pd
-import json
 from elasticsearch.helpers import bulk
 
 
@@ -20,7 +16,7 @@ books_users_df = pd.read_csv("BX-Users.csv")
 
 es = Elasticsearch(
     "http://localhost:9200",
-    http_auth=("elastic","putyourpasswordhere"),timeout=3600)
+    http_auth=("elastic","Altair1453"),timeout=3600)
 
 def books_csv_to_elastic(df):
     for index,row in df.iterrows():

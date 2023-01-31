@@ -1,9 +1,9 @@
-from elasticsearch import Elasticsearch, helpers
+from elasticsearch import helpers
 import pandas as pd
 import time
-import numpy as np
 from datetime import timedelta
-from Add2Elastic import es
+from elasticsearch import Elasticsearch
+
 
 pd.options.mode.chained_assignment = None #get rid of warning
 
@@ -23,29 +23,32 @@ def getAllBooks(es):
         yield [ str(doc['_source']['isbn'])]
 
 def uploadAvgsOfClusters(allAvgs):
-    for index, row in allAvgs.iterrows():
+    for row in allAvgs.itertuples():
         yield{
             "_index" : f"ratings_of_cluster",
             "_source" : {
-                "isbn" : str(row["isbn"]),
-                "av_rating" : float(row["av_rating"])
+                "isbn" : str(row.isbn),
+                "av_rating" : float(row.av_rating)
             }
         }
 
 def uploadAllRatings(df):
-    for index, row in df.iterrows():
+    for row in df.itertuples():
         yield{
             "_index" : "ratings_of_all_users",
             "_source" : {
-                "isbn" : str(row["isbn"]),
-                "uid": str(row["uid"]),
-                "rating" : float(row["rating"]),
-                "cluster": str(row["cluster"])
+                "isbn" : str(row.isbn),
+                "uid": str(row.uid),
+                "rating" : float(row.rating),
+                "cluster": str(row.cluster)
             }
         }
 
 
 if __name__ == '__main__':
+    es = Elasticsearch(
+    "http://localhost:9200",
+    http_auth=("elastic","Altair1453"),timeout=3600)
     #print(es.count(index='ratings_of_all_users', body={'query': {'match_all': {}}})["count"])
     numOfClusters = 64
 

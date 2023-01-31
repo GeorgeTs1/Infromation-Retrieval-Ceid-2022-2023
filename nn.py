@@ -2,16 +2,15 @@ import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
-from elasticsearch import Elasticsearch
 from elasticsearch import helpers
 from keras.preprocessing.text import Tokenizer
-from keras_preprocessing.sequence import pad_sequences
+from keras.utils import pad_sequences
 from keras.models import Sequential
 from keras.layers import LSTM,Dense,Dropout
 from keras.layers import Bidirectional,Embedding,Flatten
 from keras.callbacks import EarlyStopping,ModelCheckpoint
 from keras.backend import clear_session
-from Add2Elastic import es
+from elasticsearch import Elasticsearch
 import warnings
 import timeit
 
@@ -120,25 +119,31 @@ def get_all_ratings(cluster):
     return ratings_summaries , not_rated_summaries
 
 
-def tokenizer_X(X):
-  tokenizer = Tokenizer()
-  tokenizer.fit_on_texts(X)
-  X = tokenizer.texts_to_sequences(X)
-  max_length = max([len(x) for x in X_train])
-  vocab_size = len(tokenizer.word_index)+1 #add 1 to account for unknown word
-  X = pad_sequences(X, max_length ,padding='post')
-  return X,vocab_size,max_length
+def tokenizer_X(X_train,size): # Tokenizer for train and evaluation data
+  
+  if not size:
+    tokenizer = Tokenizer()
+    tokenizer.fit_on_texts(X_train)
+    X = tokenizer.texts_to_sequences(X_train)
+    max_length = max([len(x) for x in X_train])
+    vocab_size = len(tokenizer.word_index)+1 #add 1 to account for unknown word
+    X = pad_sequences(X, max_length ,padding='post')
+    return X,vocab_size,max_length
+  else:
+    tokenizer = Tokenizer()
+    tokenizer.fit_on_texts(X_train)
+    X = tokenizer.texts_to_sequences(X_train)
+    X = pad_sequences(X, size ,padding='post')
+    return X
 
 
 
-def tokenizer_unrated(X,size):
-  tokenizer = Tokenizer(num_words=size)
-  tokenizer.fit_on_texts(X)
-  X = tokenizer.texts_to_sequences(X)
-  max_length = max([len(x) for x in X_train])
-  vocab_size = size 
-  X = pad_sequences(X, max_length ,padding='post')
-  return X,vocab_size,max_length
+def tokenizer_unrated(X_train,size,vocab): # Tokenizer for test_data
+  tokenizer = Tokenizer(num_words=vocab)
+  tokenizer.fit_on_texts(X_train)
+  X = tokenizer.texts_to_sequences(X_train)
+  X = pad_sequences(X, size ,padding='post')
+  return X
 
 
 
@@ -163,8 +168,12 @@ def nn(vocab,emb_vector,X):
 
 
 if __name__ == '__main__':
+  
+  es = Elasticsearch(
+    "http://localhost:9200",
+    http_auth=("elastic","Altair1453"),timeout=3600)
+
   embedding_vector_length=32
-  tokenizer = Tokenizer()
   scaler = MinMaxScaler(feature_range=(0,1))
 
   
@@ -173,7 +182,7 @@ if __name__ == '__main__':
     print("creating index neural net...")
     es.indices.create(index='neural_net')
   else:
-    es.options(ignore_status=[400,404]).indices.delete(index='neural_net')
+    es.indices.delete(index='neural_net')
 
   es.indices.put_settings(index='neural_net',body={
     "refresh_interval" : "30s" 
@@ -199,15 +208,15 @@ if __name__ == '__main__':
     
     X_train, X_val, y_train, y_val = train_test_split(X, y,random_state=42,test_size=0.25)
 
-    X_train,vocab_size,max_length = tokenizer_X(X_train)
-    X_val,vocab_validate,max_validate = tokenizer_X(X_val)
+    X_train,vocab_size,max_length = tokenizer_X(X_train,None)
+    X_val = tokenizer_X(X_val,size=max_length)
     model,callbacks = nn(vocab_size,embedding_vector_length,X_train)
 
     history  = model.fit(X_train, y_train, validation_data=(X_val,y_val), 
                     epochs=1, batch_size=32, verbose=1,shuffle=True,
                     callbacks=callbacks)
 
-    X_test_summaries,v,max_length_unrated = tokenizer_unrated(not_rated['summary'],vocab_size)
+    X_test_summaries= tokenizer_unrated(not_rated['summary'],max_length,vocab_size)
 
     pred = model.predict(X_test_summaries,batch_size=1000)
 

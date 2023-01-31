@@ -1,7 +1,8 @@
-from elasticsearch import Elasticsearch, helpers
+from elasticsearch import helpers
 import pandas as pd
 from numpy import nan as NaN
-from Add2Elastic import es
+from elasticsearch import Elasticsearch
+
 
 def getAllratingsOfNNRating(es, cluster):
     resp = helpers.scan(es, index = 'neural_net', scroll = '3m', size = 100, query = {'query': {'match': {'cluster' : f'{cluster}'}}})
@@ -69,6 +70,9 @@ def tenPercentMostRelevantBooks(es, cMetric):
 
 
 if __name__ == '__main__':
+    es = Elasticsearch(
+    "http://localhost:9200",
+    http_auth=("elastic","Altair1453"),timeout=3600)
     customMetricFactor = 0.6
     metrics = tenPercentMostRelevantBooks(es, customMetricFactor)
     print(metrics.head(metrics.shape[0]))
