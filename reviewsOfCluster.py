@@ -48,7 +48,7 @@ def uploadAllRatings(df):
 if __name__ == '__main__':
     es = Elasticsearch(
     "http://localhost:9200",
-    http_auth=("elastic","Altair1453"),timeout=3600)
+    http_auth=("elastic","putyourpasswordhere"),timeout=3600)
     #print(es.count(index='ratings_of_all_users', body={'query': {'match_all': {}}})["count"])
     numOfClusters = 64
 
