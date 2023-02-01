@@ -171,7 +171,7 @@ if __name__ == '__main__':
   
   es = Elasticsearch(
     "http://localhost:9200",
-    http_auth=("elastic","Altair1453"),timeout=3600)
+    http_auth=("elastic","putyourpasswordhere"),timeout=3600)
 
   embedding_vector_length=32
   scaler = MinMaxScaler(feature_range=(0,1))
