@@ -72,7 +72,7 @@ def tenPercentMostRelevantBooks(es, cMetric):
 if __name__ == '__main__':
     es = Elasticsearch(
     "http://localhost:9200",
-    http_auth=("elastic","Altair1453"),timeout=3600)
+    http_auth=("elastic","putyourpasswordhere"),timeout=3600)
     customMetricFactor = 0.6
     metrics = tenPercentMostRelevantBooks(es, customMetricFactor)
     print(metrics.head(metrics.shape[0]))
